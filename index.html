@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script>(function(){var s=sessionStorage.getItem('theme');var d=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches;if(s==='dark'||(s!=='light'&&d))document.documentElement.classList.add('dark-mode');})();</script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Export your eLabJournal (ELJ) experiment data directly into Dataverse with automatic metadata mapping and a persistent DOI." />
+    <title>ELJ &rarr; Dataverse Integration</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #f8f9fb;
+            --card-bg: #ffffff;
+            --text-color: #1a1a1a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --accent: #1868a0;
+            --accent-muted: #4aafd4;
+            --nav-height: 64px;
+        }
+        body.dark-mode {
+            --bg-color: #14181d;
+            --card-bg: #1c2128;
+            --text-color: #e0e0e0;
+            --text-muted: #94a3b8;
+            --border-color: #2d3340;
+            --accent: #4aafd4;
+            --accent-muted: #6ec8e8;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Roboto', system-ui, -apple-system, Segoe UI, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            transition: background 0.2s, color 0.2s;
+        }
+        a { color: inherit; }
+
+        /* ══════════════════════════════════════════
+           HEADER
+        ══════════════════════════════════════════ */
+        .site-header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: var(--nav-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 100;
+        }
+        .site-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--text-color);
+            text-decoration: none;
+        }
+        .site-brand i { color: var(--accent); }
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 38px; height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+        .theme-toggle .icon-moon { display: none; }
+        body.dark-mode .theme-toggle .icon-sun { display: none; }
+        body.dark-mode .theme-toggle .icon-moon { display: block; }
+
+        /* ══════════════════════════════════════════
+           HERO
+        ══════════════════════════════════════════ */
+        .dv-hero {
+            background: linear-gradient(140deg, #0d3d6e 0%, #1868a0 45%, #1a7fb5 80%, #4aafd4 100%);
+            color: #fff;
+            margin-top: var(--nav-height);
+            padding: 5rem 2rem 4rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .dv-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .dv-hero-inner {
+            position: relative;
+            max-width: 780px;
+            margin: 0 auto;
+        }
+        .dv-hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.28);
+            border-radius: 99px;
+            padding: 0.3rem 0.9rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+        .dv-hero h1 {
+            font-size: clamp(1.9rem, 4.5vw, 3rem);
+            font-weight: 800;
+            margin: 0 0 1.1rem;
+            color: #fff;
+            line-height: 1.15;
+        }
+        .dv-hero h1 span { color: #7dd3f8; }
+        .dv-hero-sub {
+            font-size: 1.08rem;
+            color: rgba(255,255,255,0.88);
+            max-width: 580px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.7;
+        }
+        .dv-hero-sub a { color: #7dd3f8; font-weight: 700; text-decoration: none; }
+        .dv-hero-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+        }
+        .dv-btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.8rem;
+            background: #fff;
+            color: #1868a0;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: box-shadow 0.2s, transform 0.15s;
+        }
+        .dv-btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+            transform: translateY(-2px);
+        }
+        .dv-btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.8rem;
+            background: transparent;
+            color: #fff;
+            border: 2px solid rgba(255,255,255,0.55);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s, border-color 0.2s, transform 0.15s;
+        }
+        .dv-btn-ghost:hover {
+            background: rgba(255,255,255,0.12);
+            border-color: rgba(255,255,255,0.9);
+            transform: translateY(-2px);
+        }
+        .dv-hero-stats {
+            display: inline-flex;
+            gap: 2.5rem;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            padding: 1.1rem 2.2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .dv-hero-stat { text-align: center; }
+        .dv-hero-stat-n {
+            display: block;
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: #7dd3f8;
+            line-height: 1;
+        }
+        .dv-hero-stat-l {
+            display: block;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.75);
+            margin-top: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* ══════════════════════════════════════════
+           QUICK ACTION CARDS
+        ══════════════════════════════════════════ */
+        .dv-actions-wrap {
+            background: var(--bg-color);
+            padding: 0 1.5rem;
+        }
+        .dv-actions-grid {
+            max-width: 960px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
+            transform: translateY(-2rem);
+        }
+        @media (max-width: 720px) {
+            .dv-actions-grid { grid-template-columns: 1fr; transform: translateY(-1rem); }
+        }
+        .dv-action-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.6rem 1.5rem;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-color);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+            display: block;
+        }
+        .dv-action-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 8px 28px rgba(24,104,160,0.14);
+            transform: translateY(-3px);
+        }
+        .dv-action-icon {
+            width: 52px; height: 52px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.4rem;
+        }
+        .dv-icon-blue { background: rgba(24,104,160,0.1);  color: #1868a0; }
+        .dv-icon-teal { background: rgba(74,175,212,0.12); color: #2a8aad; }
+        .dv-icon-gold { background: rgba(201,162,39,0.12); color: #a87d1a; }
+        body.dark-mode .dv-icon-blue { background: rgba(74,175,212,0.18); color: #4aafd4; }
+        body.dark-mode .dv-icon-teal { background: rgba(74,175,212,0.14); color: #6ec8e8; }
+        body.dark-mode .dv-icon-gold { background: rgba(201,162,39,0.14); color: #e4c050; }
+        .dv-action-card h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin: 0 0 0.4rem;
+            color: var(--text-color);
+        }
+        .dv-action-card p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin: 0 0 1rem;
+            line-height: 1.55;
+        }
+        .dv-action-link {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        /* ══════════════════════════════════════════
+           WELCOME / ABOUT BOX
+        ══════════════════════════════════════════ */
+        .dv-welcome-section {
+            background: var(--bg-color);
+            padding: 0 1.5rem 3rem;
+        }
+        .dv-welcome-inner {
+            max-width: 960px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 2rem;
+            align-items: start;
+        }
+        @media (max-width: 820px) {
+            .dv-welcome-inner { grid-template-columns: 1fr; }
+        }
+        .dv-welcome-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+        }
+        .dv-welcome-box h2 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            margin: 0 0 0.85rem;
+            color: var(--text-color);
+        }
+        .dv-welcome-box p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin: 0 0 0.75rem;
+        }
+        .dv-welcome-box p a { color: var(--accent); font-weight: 600; text-decoration: none; }
+        .dv-welcome-box p a:hover { text-decoration: underline; }
+        .dv-login-notice {
+            background: rgba(24,104,160,0.06);
+            border: 1px solid rgba(24,104,160,0.18);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.86rem;
+            color: var(--text-color);
+            margin: 1.25rem 0 1rem;
+            text-align: center;
+        }
+        .dv-login-notice a { color: var(--accent); font-weight: 700; text-decoration: none; }
+        body.dark-mode .dv-login-notice {
+            background: rgba(74,175,212,0.08);
+            border-color: rgba(74,175,212,0.2);
+        }
+        .dv-add-btn {
+            display: block;
+            width: 100%;
+            padding: 0.85rem;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+        .dv-add-btn:hover { background: #155a8a; }
+        .dv-or {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 0.9rem 0;
+        }
+        .dv-search-row { display: flex; gap: 0; }
+        .dv-search-row input {
+            flex: 1;
+            padding: 0.65rem 0.9rem;
+            border: 1px solid var(--border-color);
+            border-right: none;
+            border-radius: 7px 0 0 7px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+        .dv-search-row input:focus { outline: none; border-color: var(--accent); }
+        .dv-search-row button {
+            padding: 0 1rem;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 0 7px 7px 0;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+        .dv-search-row button:hover { background: #155a8a; }
+
+        /* more-info sidebar */
+        .dv-info-sidebar h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin: 0 0 0.75rem;
+            color: var(--text-color);
+        }
+        .dv-info-list { list-style: none; padding: 0; margin: 0; }
+        .dv-info-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            border-top: 1px solid var(--border-color);
+        }
+        .dv-info-list li:first-child { border-top: none; padding-top: 0; }
+        .dv-info-ico {
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            background: rgba(24,104,160,0.08);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent);
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+        body.dark-mode .dv-info-ico { background: rgba(74,175,212,0.12); }
+        .dv-info-list a {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent);
+            text-decoration: none;
+            line-height: 1.4;
+        }
+        .dv-info-list a:hover { text-decoration: underline; }
+
+        /* ══════════════════════════════════════════
+           SECTION SHARED
+        ══════════════════════════════════════════ */
+        .dv-section { padding: 3rem 1.5rem; }
+        .dv-section-alt { background: rgba(24,104,160,0.03); }
+        body.dark-mode .dv-section-alt { background: rgba(74,175,212,0.04); }
+        .dv-section-inner { max-width: 960px; margin: 0 auto; }
+        .dv-section-hdr {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .dv-section-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .dv-section-title i { color: var(--accent); font-size: 1rem; }
+        .dv-see-all {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--accent);
+            text-decoration: none;
+        }
+        .dv-see-all:hover { text-decoration: underline; }
+
+        /* ══════════════════════════════════════════
+           PIPELINE
+        ══════════════════════════════════════════ */
+        .dv-pipeline {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            flex-wrap: wrap;
+            margin: 1.5rem 0;
+        }
+        .dv-pipe-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 130px;
+        }
+        .dv-pipe-icon {
+            width: 60px; height: 60px;
+            border-radius: 14px;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem;
+            color: var(--accent);
+            box-shadow: 0 2px 10px rgba(24,104,160,0.08);
+        }
+        .dv-pipe-label { font-size: 0.8rem; font-weight: 700; color: var(--text-color); text-align: center; }
+        .dv-pipe-sub   { font-size: 0.7rem; color: var(--text-muted); text-align: center; max-width: 110px; line-height: 1.35; }
+        .dv-pipe-arrow {
+            font-size: 1.5rem;
+            color: var(--accent-muted);
+            padding: 0 0.4rem;
+            margin-bottom: 1.8rem;
+        }
+        @media (max-width: 600px) {
+            .dv-pipe-arrow { transform: rotate(90deg); }
+            .dv-pipeline { flex-direction: column; }
+        }
+
+        /* ══════════════════════════════════════════
+           DATASET CARDS  (popular)
+        ══════════════════════════════════════════ */
+        .dv-card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.1rem;
+        }
+        .dv-ds-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+        .dv-ds-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 4px 18px rgba(24,104,160,0.1);
+        }
+        .dv-ds-type {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.2rem 0.6rem;
+            border-radius: 99px;
+            background: rgba(24,104,160,0.08);
+            color: var(--accent);
+            width: fit-content;
+        }
+        body.dark-mode .dv-ds-type { background: rgba(74,175,212,0.14); color: #6ec8e8; }
+        .dv-ds-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-color);
+            line-height: 1.4;
+            margin: 0;
+        }
+        .dv-ds-authors {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+        .dv-ds-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: auto;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .dv-ds-dl {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        /* ══════════════════════════════════════════
+           RECENT LIST
+        ══════════════════════════════════════════ */
+        .dv-recent-list { display: flex; flex-direction: column; gap: 0.75rem; }
+        .dv-recent-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            text-decoration: none;
+            color: inherit;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .dv-recent-item:hover {
+            border-color: var(--accent);
+            box-shadow: 0 3px 12px rgba(24,104,160,0.09);
+        }
+        .dv-recent-ico {
+            width: 40px; height: 40px;
+            border-radius: 9px;
+            background: rgba(24,104,160,0.08);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent);
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+        body.dark-mode .dv-recent-ico { background: rgba(74,175,212,0.12); }
+        .dv-recent-body { flex: 1; min-width: 0; }
+        .dv-recent-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-color);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .dv-recent-sub {
+            font-size: 0.77rem;
+            color: var(--text-muted);
+            margin-top: 0.15rem;
+        }
+        .dv-recent-date {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .dv-new-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            background: #059669;
+            color: #fff;
+            padding: 0.15rem 0.45rem;
+            border-radius: 99px;
+            margin-left: 0.4rem;
+            vertical-align: middle;
+        }
+
+        /* ══════════════════════════════════════════
+           BOTTOM CALLOUT
+        ══════════════════════════════════════════ */
+        .dv-callout {
+            background: linear-gradient(135deg, rgba(24,104,160,0.07), rgba(74,175,212,0.07));
+            border: 1px solid rgba(24,104,160,0.18);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 1.75rem;
+        }
+        body.dark-mode .dv-callout {
+            background: linear-gradient(135deg, rgba(74,175,212,0.08), rgba(24,104,160,0.08));
+            border-color: rgba(74,175,212,0.2);
+        }
+        .dv-callout h3 { font-size: 1.1rem; font-weight: 700; margin: 0 0 0.4rem; color: var(--text-color); }
+        .dv-callout p  { font-size: 0.88rem; color: var(--text-muted); margin: 0 0 1.25rem; }
+        .dv-btn-accent {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.8rem;
+            background: var(--accent);
+            color: #fff;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.15s;
+        }
+        .dv-btn-accent:hover { background: #155a8a; transform: translateY(-1px); }
+
+        /* ══════════════════════════════════════════
+           FOOTER
+        ══════════════════════════════════════════ */
+        .site-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 2rem 1.5rem;
+            text-align: center;
+            background: var(--card-bg);
+        }
+        .site-footer p {
+            margin: 0.25rem 0;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+        .site-footer a { color: var(--accent); text-decoration: none; font-weight: 600; }
+        .site-footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+
+<body>
+    <header class="site-header">
+        <a class="site-brand" href="#"><i class="fas fa-flask"></i> ELJ &rarr; Dataverse</a>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+            <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+        </button>
+    </header>
+
+    <!-- ═══════════════════════════════════
+         HERO
+    ══════════════════════════════════════ -->
+    <section class="dv-hero">
+        <div class="dv-hero-inner">
+            <div class="dv-hero-badge">
+                <i class="fas fa-flask"></i> eLabJournal &nbsp;→&nbsp; <i class="fas fa-database"></i> Dataverse
+            </div>
+            <h1>Export your <span>eLabJournal</span> data<br>directly into Dataverse</h1>
+            <p class="dv-hero-sub">
+                Record your experiments in eLabJournal — then let the ELJ pipeline do the rest.
+                Your data, metadata, and files are automatically validated and imported into
+                <a href="https://developer.elabnext.com/Identity/Account/Login" target="_blank" rel="noopener">Dataverse</a>,
+                making your research findable, citable, and FAIR with a persistent DOI.
+            </p>
+            <div class="dv-hero-actions">
+                <a class="dv-btn-primary" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank" rel="noopener">
+                    <i class="fas fa-plus-circle"></i> Add Dataset
+                </a>
+                <a class="dv-btn-ghost" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank" rel="noopener">
+                    <i class="fas fa-th-large"></i> View All Datasets
+                </a>
+            </div>
+            <div class="dv-hero-stats">
+                <div class="dv-hero-stat">
+                    <span class="dv-hero-stat-n">ELJ</span>
+                    <span class="dv-hero-stat-l">Source journal</span>
+                </div>
+                <div class="dv-hero-stat">
+                    <span class="dv-hero-stat-n">Auto</span>
+                    <span class="dv-hero-stat-l">Metadata mapping</span>
+                </div>
+                <div class="dv-hero-stat">
+                    <span class="dv-hero-stat-n">DOI</span>
+                    <span class="dv-hero-stat-l">Persistent identifier</span>
+                </div>
+                <div class="dv-hero-stat">
+                    <span class="dv-hero-stat-n">FAIR</span>
+                    <span class="dv-hero-stat-l">Findable &amp; citable</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════
+         QUICK ACTION CARDS
+    ══════════════════════════════════════ -->
+    <div class="dv-actions-wrap">
+        <div class="dv-actions-grid">
+            <a class="dv-action-card" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank" rel="noopener">
+                <div class="dv-action-icon dv-icon-blue"><i class="fas fa-upload"></i></div>
+                <h3>Add Dataset</h3>
+                <p>Log into your eLabJournal, trigger the Dataverse export, and the ELJ pipeline publishes your dataset automatically.</p>
+                <span class="dv-action-link">Open Dataverse →</span>
+            </a>
+            <a class="dv-action-card" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank" rel="noopener">
+                <div class="dv-action-icon dv-icon-teal"><i class="fas fa-search"></i></div>
+                <h3>View All Datasets</h3>
+                <p>Browse all datasets published via the ELJ pipeline — filter by subject, discipline, or date.</p>
+                <span class="dv-action-link">Browse datasets →</span>
+            </a>
+            <a class="dv-action-card" href="#how-it-works">
+                <div class="dv-action-icon dv-icon-gold"><i class="fas fa-route"></i></div>
+                <h3>How It Works</h3>
+                <p>See exactly how data flows from your eLabJournal experiment into a published Dataverse dataset.</p>
+                <span class="dv-action-link">View pipeline →</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════
+         WELCOME / ABOUT
+    ══════════════════════════════════════ -->
+    <div class="dv-welcome-section">
+        <div class="dv-welcome-inner">
+
+            <div class="dv-welcome-box">
+                <h2>Welcome to the ELJ &rarr; Dataverse integration</h2>
+                <p>
+                    <strong>eLabJournal (ELJ)</strong> is an Electronic Lab Notebook used by research teams to
+                    record experiments, samples, and protocols. This integration connects ELJ directly to
+                    <a href="https://developer.elabnext.com/Identity/Account/Login" target="_blank" rel="noopener">Dataverse</a> —
+                    the open-source research data repository platform. Once you trigger an export from within ELJ,
+                    the ELJ pipeline automatically validates, maps, and imports your experiment data into Dataverse
+                    as a fully structured, citable dataset.
+                </p>
+                <p>
+                    No manual upload needed. Your ELJ experiment metadata — authors, title, description, keywords —
+                    maps directly to Dataverse fields, so your published dataset is FAIR-compliant from the start.
+                </p>
+                <div class="dv-login-notice">
+                    Please <a href="https://developer.elabnext.com/Identity/Account/Login" target="_blank" rel="noopener">Log In</a>
+                    to Dataverse to manage and view your imported datasets.
+                </div>
+                <a class="dv-add-btn" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank" rel="noopener">
+                    Add your Dataset to Dataverse
+                </a>
+                <div class="dv-or">Or</div>
+                <div class="dv-search-row">
+                    <input type="text" id="dvSearchInput" placeholder="Search all Dataverse datasets…" />
+                    <button onclick="dvSearch()" aria-label="Search Dataverse">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+
+            <aside class="dv-info-sidebar">
+                <h3>More Information</h3>
+                <ul class="dv-info-list">
+                    <li>
+                        <div class="dv-info-ico"><i class="fas fa-globe"></i></div>
+                        <a href="https://dataverse.org/" target="_blank" rel="noopener">The Dataverse Project</a>
+                    </li>
+                    <li>
+                        <div class="dv-info-ico"><i class="fas fa-flask"></i></div>
+                        <a href="https://www.elabnext.com/elabjournal/" target="_blank" rel="noopener">eLabJournal (ELJ)</a>
+                    </li>
+                    <li>
+                        <div class="dv-info-ico"><i class="fas fa-book"></i></div>
+                        <a href="https://developer.elabnext.com/" target="_blank" rel="noopener">ELJ Developer Docs &amp; API</a>
+                    </li>
+                    <li>
+                        <div class="dv-info-ico"><i class="fas fa-route"></i></div>
+                        <a href="#how-it-works">How the export pipeline works</a>
+                    </li>
+                    <li>
+                        <div class="dv-info-ico"><i class="fas fa-question-circle"></i></div>
+                        <a href="https://www.elabnext.com/support/" target="_blank" rel="noopener">Need help? Visit ELJ support</a>
+                    </li>
+                </ul>
+            </aside>
+
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════
+         HOW IT WORKS — pipeline
+    ══════════════════════════════════════ -->
+    <div class="dv-section dv-section-alt" id="how-it-works">
+        <div class="dv-section-inner">
+            <div class="dv-section-hdr">
+                <h2 class="dv-section-title"><i class="fas fa-route"></i> How the ELJ &rarr; Dataverse pipeline works</h2>
+            </div>
+            <div class="dv-pipeline">
+                <div class="dv-pipe-step">
+                    <div class="dv-pipe-icon"><i class="fas fa-flask"></i></div>
+                    <div class="dv-pipe-label">eLabJournal</div>
+                    <div class="dv-pipe-sub">Record your experiment &amp; attach files</div>
+                </div>
+                <div class="dv-pipe-arrow">→</div>
+                <div class="dv-pipe-step">
+                    <div class="dv-pipe-icon"><i class="fas fa-file-export"></i></div>
+                    <div class="dv-pipe-label">ELJ Export</div>
+                    <div class="dv-pipe-sub">Trigger Dataverse export in ELJ</div>
+                </div>
+                <div class="dv-pipe-arrow">→</div>
+                <div class="dv-pipe-step">
+                    <div class="dv-pipe-icon"><i class="fas fa-cogs"></i></div>
+                    <div class="dv-pipe-label">ELJ Pipeline</div>
+                    <div class="dv-pipe-sub">Automatic metadata validation &amp; mapping</div>
+                </div>
+                <div class="dv-pipe-arrow">→</div>
+                <div class="dv-pipe-step">
+                    <div class="dv-pipe-icon"><i class="fas fa-database"></i></div>
+                    <div class="dv-pipe-label">Dataverse</div>
+                    <div class="dv-pipe-sub">Dataset published with persistent DOI</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════
+         POPULAR DOWNLOADS
+    ══════════════════════════════════════ -->
+    <div class="dv-section">
+        <div class="dv-section-inner">
+            <div class="dv-section-hdr">
+                <h2 class="dv-section-title"><i class="fas fa-fire"></i> Popular downloads</h2>
+                <a class="dv-see-all" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank" rel="noopener">View all on Dataverse →</a>
+            </div>
+            <div class="dv-card-grid">
+
+                <a class="dv-ds-card" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank" rel="noopener">
+                    <span class="dv-ds-type"><i class="fas fa-dna"></i> Genomics</span>
+                    <p class="dv-ds-title">RNA-seq expression profiles from murine cortical neuron cultures under hypoxic stress</p>
+                    <p class="dv-ds-authors">Müller, A.; Schneider, T.; Hoffmann, K. — 2024</p>
+                    <div class="dv-ds-meta">
+                        <span>CC BY 4.0 · 1.2 GB</span>
+                        <span class="dv-ds-dl"><i class="fas fa-download"></i> 1 842</span>
+                    </div>
+                </a>
+
+                <a class="dv-ds-card" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank" rel="noopener">
+                    <span class="dv-ds-type"><i class="fas fa-chart-bar"></i> Clinical</span>
+                    <p class="dv-ds-title">Longitudinal cohort data: patient outcomes after cardiac rehabilitation (REHA-KOELN 2019–2023)</p>
+                    <p class="dv-ds-authors">Weber, S.; Brandt, C. — 2023</p>
+                    <div class="dv-ds-meta">
+                        <span>CC0 · 340 MB</span>
+                        <span class="dv-ds-dl"><i class="fas fa-download"></i> 973</span>
+                    </div>
+                </a>
+
+                <a class="dv-ds-card" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank" rel="noopener">
+                    <span class="dv-ds-type"><i class="fas fa-atom"></i> Chemistry</span>
+                    <p class="dv-ds-title">NMR spectral library of synthesised heterocyclic compounds — CologneChemDB v2</p>
+                    <p class="dv-ds-authors">Fischer, R.; Lange, M. — 2024</p>
+                    <div class="dv-ds-meta">
+                        <span>CC BY 4.0 · 220 MB</span>
+                        <span class="dv-ds-dl"><i class="fas fa-download"></i> 748</span>
+                    </div>
+                </a>
+
+                <a class="dv-ds-card" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank" rel="noopener">
+                    <span class="dv-ds-type"><i class="fas fa-microscope"></i> Imaging</span>
+                    <p class="dv-ds-title">Fluorescence microscopy image set: actin cytoskeleton dynamics in HeLa cells</p>
+                    <p class="dv-ds-authors">Klein, P.; Schulz, J. — 2023</p>
+                    <div class="dv-ds-meta">
+                        <span>CC BY-SA 4.0 · 4.8 GB</span>
+                        <span class="dv-ds-dl"><i class="fas fa-download"></i> 612</span>
+                    </div>
+                </a>
+
+                <a class="dv-ds-card" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank" rel="noopener">
+                    <span class="dv-ds-type"><i class="fas fa-poll"></i> Survey</span>
+                    <p class="dv-ds-title">Researcher attitudes toward open data sharing in the biomedical sciences — survey 2024</p>
+                    <p class="dv-ds-authors">Richter, A.; Vogt, N. — 2024</p>
+                    <div class="dv-ds-meta">
+                        <span>CC0 · 18 MB</span>
+                        <span class="dv-ds-dl"><i class="fas fa-download"></i> 501</span>
+                    </div>
+                </a>
+
+                <a class="dv-ds-card" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank" rel="noopener">
+                    <span class="dv-ds-type"><i class="fas fa-vial"></i> Proteomics</span>
+                    <p class="dv-ds-title">Mass spectrometry proteomics dataset: serum biomarkers in type-2 diabetes progression</p>
+                    <p class="dv-ds-authors">Bauer, L.; Zimmermann, F. — 2024</p>
+                    <div class="dv-ds-meta">
+                        <span>CC BY 4.0 · 890 MB</span>
+                        <span class="dv-ds-dl"><i class="fas fa-download"></i> 489</span>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════
+         RECENT ADDITIONS
+    ══════════════════════════════════════ -->
+    <div class="dv-section dv-section-alt">
+        <div class="dv-section-inner">
+            <div class="dv-section-hdr">
+                <h2 class="dv-section-title"><i class="fas fa-clock"></i> Recent additions</h2>
+                <a class="dv-see-all" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank" rel="noopener">View all on Dataverse →</a>
+            </div>
+            <div class="dv-recent-list">
+
+                <a class="dv-recent-item" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank" rel="noopener">
+                    <div class="dv-recent-ico"><i class="fas fa-dna"></i></div>
+                    <div class="dv-recent-body">
+                        <div class="dv-recent-title">
+                            Single-cell transcriptomics of pancreatic islets in pre-diabetic mice
+                            <span class="dv-new-badge">New</span>
+                        </div>
+                        <div class="dv-recent-sub">Hartmann, G.; Weiß, K. — Genomics · CC BY 4.0</div>
+                    </div>
+                    <div class="dv-recent-date">12 Jun 2025</div>
+                </a>
+
+                <a class="dv-recent-item" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank" rel="noopener">
+                    <div class="dv-recent-ico"><i class="fas fa-brain"></i></div>
+                    <div class="dv-recent-body">
+                        <div class="dv-recent-title">
+                            fMRI resting-state dataset — cognitive decline in ageing cohort (n = 120)
+                            <span class="dv-new-badge">New</span>
+                        </div>
+                        <div class="dv-recent-sub">Peters, M.; Lang, R. — Neuroscience · CC0</div>
+                    </div>
+                    <div class="dv-recent-date">10 Jun 2025</div>
+                </a>
+
+                <a class="dv-recent-item" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank" rel="noopener">
+                    <div class="dv-recent-ico"><i class="fas fa-leaf"></i></div>
+                    <div class="dv-recent-body">
+                        <div class="dv-recent-title">Soil microbiome diversity across Rhine valley agricultural sites</div>
+                        <div class="dv-recent-sub">Krause, S.; Becker, T. — Earth Sciences · CC BY-SA 4.0</div>
+                    </div>
+                    <div class="dv-recent-date">7 Jun 2025</div>
+                </a>
+
+                <a class="dv-recent-item" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank" rel="noopener">
+                    <div class="dv-recent-ico"><i class="fas fa-chart-line"></i></div>
+                    <div class="dv-recent-body">
+                        <div class="dv-recent-title">Clinical biobank linkage: oncology patient records 2015–2024, anonymised</div>
+                        <div class="dv-recent-sub">Schwarz, J.; Maier, A. — Clinical · CC BY-NC 4.0</div>
+                    </div>
+                    <div class="dv-recent-date">3 Jun 2025</div>
+                </a>
+
+                <a class="dv-recent-item" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank" rel="noopener">
+                    <div class="dv-recent-ico"><i class="fas fa-atom"></i></div>
+                    <div class="dv-recent-body">
+                        <div class="dv-recent-title">X-ray crystallography structures of novel kinase inhibitor candidates</div>
+                        <div class="dv-recent-sub">Koch, P.; Neumann, B. — Chemistry · CC BY 4.0</div>
+                    </div>
+                    <div class="dv-recent-date">29 May 2025</div>
+                </a>
+
+            </div>
+
+            <div class="dv-callout">
+                <h3>Ready to publish your ELJ data?</h3>
+                <p>Trigger the Dataverse export from within eLabJournal — the ELJ pipeline handles the rest automatically.</p>
+                <a class="dv-btn-accent" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank" rel="noopener">
+                    <i class="fas fa-plus-circle"></i> Add Dataset to Dataverse
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <p>ELJ &rarr; Dataverse Integration — connecting eLabJournal experiments to the Dataverse research data repository.</p>
+        <p>
+            <a href="https://www.elabnext.com/elabjournal/" target="_blank" rel="noopener">eLabJournal</a> ·
+            <a href="https://dataverse.org/" target="_blank" rel="noopener">Dataverse Project</a> ·
+            <a href="https://developer.elabnext.com/" target="_blank" rel="noopener">ELJ Developer Docs</a>
+        </p>
+    </footer>
+
+    <script>
+        /* Theme toggle — sync <html> (set early in <head> to avoid flash) with <body> on load */
+        if (document.documentElement.classList.contains('dark-mode')) {
+            document.body.classList.add('dark-mode');
+        }
+        var themeBtn = document.getElementById('themeToggle');
+        themeBtn.addEventListener('click', function () {
+            var isDark = document.body.classList.toggle('dark-mode');
+            document.documentElement.classList.toggle('dark-mode', isDark);
+            sessionStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+
+        /* Dataverse search */
+        function dvSearch() {
+            window.open('https://developer.elabnext.com/Identity/Account/Login', '_blank');
+        }
+        document.getElementById('dvSearchInput').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') dvSearch();
+        });
+    </script>
+</body>
+
+</html>
