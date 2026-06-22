@@ -126,7 +126,7 @@
 
         .dv-hero-inner {
             position: relative;
-            max-width: 780px;
+            max-width: 900px;
             margin: 0 auto;
         }
 
@@ -160,7 +160,7 @@
         .dv-hero-sub {
             font-size: 1.08rem;
             color: rgba(255, 255, 255, 0.88);
-            max-width: 580px;
+            max-width: 100%;
             margin: 0 auto 2.5rem;
             line-height: 1.7;
         }
@@ -169,56 +169,6 @@
             color: #7dd3f8;
             font-weight: 700;
             text-decoration: none;
-        }
-
-        .dv-hero-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 3rem;
-        }
-
-        .dv-btn-primary {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.8rem 1.8rem;
-            background: #fff;
-            color: #1868a0;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: 700;
-            text-decoration: none;
-            cursor: pointer;
-            transition: box-shadow 0.2s, transform 0.15s;
-        }
-
-        .dv-btn-primary:hover {
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
-            transform: translateY(-2px);
-        }
-
-        .dv-btn-ghost {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.8rem 1.8rem;
-            background: transparent;
-            color: #fff;
-            border: 2px solid rgba(255, 255, 255, 0.55);
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: background 0.2s, border-color 0.2s, transform 0.15s;
-        }
-
-        .dv-btn-ghost:hover {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.9);
-            transform: translateY(-2px);
         }
 
         .dv-hero-stats {
@@ -455,51 +405,6 @@
             background: #155a8a;
         }
 
-        .dv-or {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin: 0.9rem 0;
-        }
-
-        .dv-search-row {
-            display: flex;
-            gap: 0;
-        }
-
-        .dv-search-row input {
-            flex: 1;
-            padding: 0.65rem 0.9rem;
-            border: 1px solid var(--border-color);
-            border-right: none;
-            border-radius: 7px 0 0 7px;
-            font-size: 0.9rem;
-            font-family: inherit;
-            background: var(--bg-color);
-            color: var(--text-color);
-        }
-
-        .dv-search-row input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .dv-search-row button {
-            padding: 0 1rem;
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            border-radius: 0 7px 7px 0;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background 0.2s;
-        }
-
-        .dv-search-row button:hover {
-            background: #155a8a;
-        }
-
         /* more-info sidebar */
         .dv-info-sidebar h3 {
             font-size: 1rem;
@@ -675,6 +580,119 @@
             .dv-pipeline {
                 flex-direction: column;
             }
+        }
+
+        /* ══════════════════════════════════════════
+           HERO SEARCH + QUICK LINKS
+        ══════════════════════════════════════════ */
+        .dv-hero-search {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #fff;
+            border-radius: 10px;
+            padding: 0.35rem 0.35rem 0.35rem 1.1rem;
+            max-width: 620px;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 10px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .dv-hero-search i {
+            color: #64748b;
+            font-size: 0.95rem;
+        }
+
+        .dv-hero-search input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 0.75rem 0.25rem;
+            font-size: 0.95rem;
+            font-family: inherit;
+            color: #1a1a1a;
+            background: transparent;
+        }
+
+        .dv-hero-search button {
+            padding: 0.7rem 1.4rem;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-family: inherit;
+        }
+
+        .dv-hero-search button:hover {
+            background: #155a8a;
+        }
+
+        .dv-hero-quicklinks {
+            display: flex;
+            gap: 1.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2.5rem;
+            font-size: 0.85rem;
+        }
+
+        .dv-hero-quicklinks a {
+            color: rgba(255, 255, 255, 0.88);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .dv-hero-quicklinks a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        .dv-placeholder {
+            font-style: italic;
+            opacity: 0.65;
+        }
+
+        /* ══════════════════════════════════════════
+           BROWSE BY SUBJECT
+        ══════════════════════════════════════════ */
+        .dv-subject-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 0.9rem;
+        }
+
+        .dv-subject-chip {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.6rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.15rem 0.75rem;
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-align: center;
+            transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+        }
+
+        .dv-subject-chip i {
+            font-size: 1.3rem;
+            color: var(--accent);
+        }
+
+        .dv-subject-chip:hover {
+            border-color: var(--accent);
+            box-shadow: 0 6px 20px rgba(24, 104, 160, 0.12);
+            transform: translateY(-2px);
         }
 
         /* ══════════════════════════════════════════
@@ -945,40 +963,44 @@
             <div class="dv-hero-badge">
                 <i class="fas fa-flask"></i> eLabJournal &nbsp;→&nbsp; <i class="fas fa-database"></i> Dataverse
             </div>
-            <h1>Export your <span>eLabJournal</span> data<br>directly into Dataverse</h1>
-            <p class="dv-hero-sub">
-                Record your experiments in eLabJournal — then let the ELJ pipeline do the rest.
-                Your data, metadata, and files are automatically validated and imported into
-                <a href="https://developer.elabnext.com/Identity/Account/Login" target="_blank"
-                    rel="noopener">Dataverse</a>,
-                making your research findable, citable, and FAIR with a persistent DOI.
+            <h1>Find, Share &amp; Cite <span>Research Data</span></h1>
+            <p class="dv-hero-sub dv-placeholder">
+                This repository is built on <strong>FAIRspace</strong>, a research data management platform
+                designed around the FAIR principles i.e. Findable, Accessible, Interoperable, and Reusable.
+                FAIRspace gives research teams a structured way to organise experiments, samples, and metadata
+                alongside the underlying data files, so nothing gets lost between the lab and long-term storage.
+                Datasets registered here carry rich, standardised metadata and persistent identifiers, making
+                them easy to discover, cite, and reuse, even by people outside the team that produced them.
+                Sensitive and access-controlled data can coexist with openly published datasets, governed by
+                fine-grained permissions defined for each project.
             </p>
-            <div class="dv-hero-actions">
-                <a class="dv-btn-primary" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank"
-                    rel="noopener">
-                    <i class="fas fa-plus-circle"></i> Add Dataset
-                </a>
-                <a class="dv-btn-ghost" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank"
-                    rel="noopener">
-                    <i class="fas fa-th-large"></i> View All Datasets
-                </a>
+            <form class="dv-hero-search" onsubmit="event.preventDefault(); dvSearch();">
+                <i class="fas fa-search"></i>
+                <input type="text" id="dvSearchInput" placeholder="Search datasets, dataverses, files…" />
+                <button type="submit">Search</button>
+            </form>
+            <div class="dv-hero-quicklinks">
+                <a href="#latest-datasets"><i class="fas fa-database"></i> Latest Datasets</a>
+                <a href="#latest-dataverses"><i class="fas fa-folder-open"></i> Latest Dataverses</a>
+                <a href="https://developer.elabnext.com/Identity/Account/Login" target="_blank" rel="noopener">
+                    <i class="fas fa-plus-circle"></i> Add Data</a>
             </div>
             <div class="dv-hero-stats">
                 <div class="dv-hero-stat">
-                    <span class="dv-hero-stat-n">ELJ</span>
-                    <span class="dv-hero-stat-l">Source journal</span>
+                    <span class="dv-hero-stat-n">128</span>
+                    <span class="dv-hero-stat-l">Dataverses</span>
                 </div>
                 <div class="dv-hero-stat">
-                    <span class="dv-hero-stat-n">Auto</span>
-                    <span class="dv-hero-stat-l">Metadata mapping</span>
+                    <span class="dv-hero-stat-n">1 940</span>
+                    <span class="dv-hero-stat-l">Datasets</span>
+                </div>
+                <div class="dv-hero-stat">
+                    <span class="dv-hero-stat-n">12 600</span>
+                    <span class="dv-hero-stat-l">Files</span>
                 </div>
                 <div class="dv-hero-stat">
                     <span class="dv-hero-stat-n">DOI</span>
                     <span class="dv-hero-stat-l">Persistent identifier</span>
-                </div>
-                <div class="dv-hero-stat">
-                    <span class="dv-hero-stat-n">FAIR</span>
-                    <span class="dv-hero-stat-l">Findable &amp; citable</span>
                 </div>
             </div>
         </div>
@@ -989,20 +1011,17 @@
     ══════════════════════════════════════ -->
     <div class="dv-actions-wrap">
         <div class="dv-actions-grid">
-            <a class="dv-action-card" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank"
-                rel="noopener">
-                <div class="dv-action-icon dv-icon-blue"><i class="fas fa-upload"></i></div>
-                <h3>Add Dataset</h3>
-                <p>Log into your eLabJournal, trigger the Dataverse export, and the ELJ pipeline publishes your dataset
-                    automatically.</p>
-                <span class="dv-action-link">Open Dataverse →</span>
+            <a class="dv-action-card" href="#latest-dataverses">
+                <div class="dv-action-icon dv-icon-blue"><i class="fas fa-folder-open"></i></div>
+                <h3>Browse Dataverses</h3>
+                <p>Explore collections of related datasets organised by research group, project, or subject area.</p>
+                <span class="dv-action-link">View dataverses →</span>
             </a>
-            <a class="dv-action-card" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank"
-                rel="noopener">
-                <div class="dv-action-icon dv-icon-teal"><i class="fas fa-search"></i></div>
-                <h3>View All Datasets</h3>
-                <p>Browse all datasets published via the ELJ pipeline — filter by subject, discipline, or date.</p>
-                <span class="dv-action-link">Browse datasets →</span>
+            <a class="dv-action-card" href="#latest-datasets">
+                <div class="dv-action-icon dv-icon-teal"><i class="fas fa-database"></i></div>
+                <h3>Browse Datasets</h3>
+                <p>Search and download published, citable research datasets from across the repository.</p>
+                <span class="dv-action-link">View datasets →</span>
             </a>
             <a class="dv-action-card" href="#how-it-works">
                 <div class="dv-action-icon dv-icon-gold"><i class="fas fa-route"></i></div>
@@ -1014,42 +1033,32 @@
     </div>
 
     <!-- ═══════════════════════════════════
-         WELCOME / ABOUT
+    WELCOME / ABOUT
     ══════════════════════════════════════ -->
     <div class="dv-welcome-section">
         <div class="dv-welcome-inner">
 
             <div class="dv-welcome-box">
-                <h2>Welcome to the ELJ &rarr; Dataverse integration</h2>
+                <h2>About this repository</h2>
                 <p>
-                    <strong>eLabJournal (ELJ)</strong> is an Electronic Lab Notebook used by research teams to
-                    record experiments, samples, and protocols. This integration connects ELJ directly to
-                    <a href="https://developer.elabnext.com/Identity/Account/Login" target="_blank"
-                        rel="noopener">Dataverse</a> —
-                    the open-source research data repository platform. Once you trigger an export from within ELJ,
-                    the ELJ pipeline automatically validates, maps, and imports your experiment data into Dataverse
-                    as a fully structured, citable dataset.
-                </p>
-                <p>
-                    No manual upload needed. Your ELJ experiment metadata — authors, title, description, keywords —
-                    maps directly to Dataverse fields, so your published dataset is FAIR-compliant from the start.
+                    This repository is built on <strong>FAIRspace</strong>, a research data management platform
+                    designed around the FAIR principles i.e. Findable, Accessible, Interoperable, and Reusable.
+                    FAIRspace gives research teams a structured way to organise experiments, samples, and metadata
+                    alongside the underlying data files, so nothing gets lost between the lab and long-term storage.
+                    Datasets registered here carry rich, standardised metadata and persistent identifiers, making
+                    them easy to discover, cite, and reuse, even by people outside the team that produced them.
+                    Sensitive and access-controlled data can coexist with openly published datasets, governed by
+                    fine-grained permissions defined for each project.
                 </p>
                 <div class="dv-login-notice">
                     Please <a href="https://developer.elabnext.com/Identity/Account/Login" target="_blank"
                         rel="noopener">Log In</a>
-                    to Dataverse to manage and view your imported datasets.
+                    to publish and manage your own dataverses and datasets.
                 </div>
                 <a class="dv-add-btn" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank"
                     rel="noopener">
                     Add your Dataset to Dataverse
                 </a>
-                <div class="dv-or">Or</div>
-                <div class="dv-search-row">
-                    <input type="text" id="dvSearchInput" placeholder="Search all Dataverse datasets…" />
-                    <button onclick="dvSearch()" aria-label="Search Dataverse">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </div>
             </div>
 
             <aside class="dv-info-sidebar">
@@ -1122,12 +1131,99 @@
     </div>
 
     <!-- ═══════════════════════════════════
-         POPULAR DOWNLOADS
+         BROWSE BY SUBJECT
     ══════════════════════════════════════ -->
-    <div class="dv-section">
+    <div class="dv-section dv-section-alt">
         <div class="dv-section-inner">
             <div class="dv-section-hdr">
-                <h2 class="dv-section-title"><i class="fas fa-fire"></i> Popular downloads</h2>
+                <h2 class="dv-section-title"><i class="fas fa-layer-group"></i> Browse by Subject</h2>
+            </div>
+            <div class="dv-subject-grid">
+                <a class="dv-subject-chip" href="#"><i class="fas fa-dna"></i> Life Sciences</a>
+                <a class="dv-subject-chip" href="#"><i class="fas fa-chart-bar"></i> Clinical &amp; Health</a>
+                <a class="dv-subject-chip" href="#"><i class="fas fa-atom"></i> Chemistry</a>
+                <a class="dv-subject-chip" href="#"><i class="fas fa-brain"></i> Neuroscience</a>
+                <a class="dv-subject-chip" href="#"><i class="fas fa-leaf"></i> Earth &amp; Environment</a>
+                <a class="dv-subject-chip" href="#"><i class="fas fa-microscope"></i> Imaging</a>
+                <a class="dv-subject-chip" href="#"><i class="fas fa-vial"></i> Proteomics</a>
+                <a class="dv-subject-chip" href="#"><i class="fas fa-poll"></i> Social Sciences</a>
+                <a class="dv-subject-chip" href="#"><i class="fas fa-laptop-code"></i> Computer Science</a>
+                <a class="dv-subject-chip" href="#"><i class="fas fa-calculator"></i> Mathematics</a>
+                <a class="dv-subject-chip" href="#"><i class="fas fa-gavel"></i> Law</a>
+                <a class="dv-subject-chip" href="#"><i class="fas fa-ellipsis"></i> Other</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════
+         LATEST DATAVERSES
+    ══════════════════════════════════════ -->
+    <div class="dv-section" id="latest-dataverses">
+        <div class="dv-section-inner">
+            <div class="dv-section-hdr">
+                <h2 class="dv-section-title"><i class="fas fa-folder-open"></i> Latest Dataverses</h2>
+                <a class="dv-see-all" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank"
+                    rel="noopener">View all dataverses →</a>
+            </div>
+            <div class="dv-recent-list">
+
+                <a class="dv-recent-item" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank"
+                    rel="noopener">
+                    <div class="dv-recent-ico"><i class="fas fa-dna"></i></div>
+                    <div class="dv-recent-body">
+                        <div class="dv-recent-title">
+                            Genomics Research Group
+                            <span class="dv-new-badge">New</span>
+                        </div>
+                        <div class="dv-recent-sub">RNA-seq, single-cell, and variant-calling datasets</div>
+                    </div>
+                    <div class="dv-recent-date">24 datasets</div>
+                </a>
+
+                <a class="dv-recent-item" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank"
+                    rel="noopener">
+                    <div class="dv-recent-ico"><i class="fas fa-chart-bar"></i></div>
+                    <div class="dv-recent-body">
+                        <div class="dv-recent-title">
+                            Clinical Outcomes Research
+                            <span class="dv-new-badge">New</span>
+                        </div>
+                        <div class="dv-recent-sub">Longitudinal patient cohort and trial data</div>
+                    </div>
+                    <div class="dv-recent-date">17 datasets</div>
+                </a>
+
+                <a class="dv-recent-item" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank"
+                    rel="noopener">
+                    <div class="dv-recent-ico"><i class="fas fa-atom"></i></div>
+                    <div class="dv-recent-body">
+                        <div class="dv-recent-title">Synthetic &amp; Medicinal Chemistry Lab</div>
+                        <div class="dv-recent-sub">Spectral libraries and compound screening data</div>
+                    </div>
+                    <div class="dv-recent-date">31 datasets</div>
+                </a>
+
+                <a class="dv-recent-item" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank"
+                    rel="noopener">
+                    <div class="dv-recent-ico"><i class="fas fa-microscope"></i></div>
+                    <div class="dv-recent-body">
+                        <div class="dv-recent-title">Cell Imaging Core Facility</div>
+                        <div class="dv-recent-sub">Microscopy image sets and analysis pipelines</div>
+                    </div>
+                    <div class="dv-recent-date">9 datasets</div>
+                </a>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════
+         POPULAR DATASETS
+    ══════════════════════════════════════ -->
+    <div class="dv-section dv-section-alt">
+        <div class="dv-section-inner">
+            <div class="dv-section-hdr">
+                <h2 class="dv-section-title"><i class="fas fa-fire"></i> Popular Datasets</h2>
                 <a class="dv-see-all" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank"
                     rel="noopener">View all on Dataverse →</a>
             </div>
@@ -1210,12 +1306,12 @@
     </div>
 
     <!-- ═══════════════════════════════════
-         RECENT ADDITIONS
+         LATEST DATASETS
     ══════════════════════════════════════ -->
-    <div class="dv-section dv-section-alt">
+    <div class="dv-section" id="latest-datasets">
         <div class="dv-section-inner">
             <div class="dv-section-hdr">
-                <h2 class="dv-section-title"><i class="fas fa-clock"></i> Recent additions</h2>
+                <h2 class="dv-section-title"><i class="fas fa-clock"></i> Latest Datasets</h2>
                 <a class="dv-see-all" href="https://developer.elabnext.com/Identity/Account/Login" target="_blank"
                     rel="noopener">View all on Dataverse →</a>
             </div>
@@ -1322,9 +1418,6 @@
         function dvSearch() {
             window.open('https://developer.elabnext.com/Identity/Account/Login', '_blank');
         }
-        document.getElementById('dvSearchInput').addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') dvSearch();
-        });
     </script>
 </body>
 
